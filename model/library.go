@@ -1,5 +1,5 @@
 package model
 
 type Library struct {
-	Books []Book
+	Books []Book `json:"books"`
 }

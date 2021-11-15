@@ -1,5 +1,5 @@
 package model
 
 type Author struct {
-	Name string
+	Name string `json:"name"`
 }

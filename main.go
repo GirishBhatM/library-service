@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"library-service/controller"
 	"library-service/model"
 )
 
 func main() {
 	fmt.Println("hello library service")
 	books := []model.Book{}
-	book1 := model.Book{Id: "1", Name: "Harry Potter", Author: model.Author{Name: "Unknown"}}
+	book1 := model.Book{Id: 1, Name: "Harry Potter", Author: model.Author{Name: "Unknown"}}
 	books = append(books, book1)
 	books = append(books, book1)
 	books = append(books, book1)
@@ -16,4 +17,9 @@ func main() {
 	fmt.Printf("%+v\n", library)
 	fmt.Printf("%d", len(books))
 
+	handleRequests()
+}
+
+func handleRequests() {
+	controller.MapRoutes()
 }
