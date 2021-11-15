@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"library-service/model"
 	"net/http"
@@ -30,4 +31,12 @@ func AddBook(w http.ResponseWriter, r *http.Request) (model.Book, error) {
 		bookStore[book.Id] = book
 		return book, nil
 	}
+}
+
+func GetBook(bookId int) (model.Book, error) {
+	book, exists := bookStore[bookId]
+	if !exists {
+		return model.Book{}, errors.New("No book exists")
+	}
+	return book, nil
 }

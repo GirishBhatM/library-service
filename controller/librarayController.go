@@ -6,6 +6,7 @@ import (
 	"library-service/service"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -15,7 +16,9 @@ func MapRoutes() {
 	libraryRoutes.HandleFunc("/", indexPage).Methods("GET")
 	libraryRoutes.HandleFunc("/books", getAllBooks).Methods("GET")
 	libraryRoutes.HandleFunc("/books", addBook).Methods("POST")
+	libraryRoutes.HandleFunc("/books/{id}", getBookById).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", libraryRoutes))
+	fmt.Println("server started on 8080")
 }
 
 func getAllBooks(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +33,20 @@ func getAllBooks(w http.ResponseWriter, r *http.Request) {
 }
 
 func getBookById(w http.ResponseWriter, r *http.Request) {
+	var params = mux.Vars(r)
+	bookId, e := strconv.ParseInt(params["id"], 10, 64)
+	w.Header().Set("Content-Type", "application/json")
+	if e != nil {
+		fmt.Fprint(w, `"{"error": "invalid id"}"`)
+	} else {
+		book, err := service.GetBook(int(bookId))
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, `"{"error": "No data found"}"`)
+		} else {
+			json.NewEncoder(w).Encode(book)
+		}
+	}
 
 }
 
