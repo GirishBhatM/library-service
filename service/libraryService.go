@@ -5,17 +5,12 @@ import (
 	"errors"
 	"io/ioutil"
 	"library-service/model"
+	"library-service/repository"
 	"net/http"
 )
 
-var bookStore = make(map[int]model.Book)
-var id int = 0
-
 func GetAllBooks(w http.ResponseWriter, r *http.Request) ([]model.Book, error) {
-	books := []model.Book{}
-	for _, v := range bookStore {
-		books = append(books, v)
-	}
+	books := repository.FindAll()
 	return books, nil
 }
 
@@ -26,17 +21,15 @@ func AddBook(w http.ResponseWriter, r *http.Request) (model.Book, error) {
 	if error != nil {
 		return model.Book{}, error
 	} else {
-		id++
-		book.Id = id
-		bookStore[book.Id] = book
+		book.Id = repository.Save(book)
 		return book, nil
 	}
 }
 
 func GetBook(bookId int) (model.Book, error) {
-	book, exists := bookStore[bookId]
+	book, exists := repository.GetById(bookId)
 	if !exists {
-		return model.Book{}, errors.New("No book exists")
+		return model.Book{}, errors.New("no book exists")
 	}
 	return book, nil
 }
