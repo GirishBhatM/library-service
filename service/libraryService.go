@@ -15,7 +15,10 @@ func GetAllBooks(w http.ResponseWriter, r *http.Request) ([]model.Book, error) {
 }
 
 func AddBook(w http.ResponseWriter, r *http.Request) (model.Book, error) {
-	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	bodyBytes, e := ioutil.ReadAll(r.Body)
+	if e != nil {
+		return model.Book{}, errors.New("invalid request. failed to map the structure to book object")
+	}
 	book := model.Book{}
 	error := json.Unmarshal(bodyBytes, &book)
 	if error != nil {
@@ -26,7 +29,7 @@ func AddBook(w http.ResponseWriter, r *http.Request) (model.Book, error) {
 	}
 }
 
-func GetBook(bookId int) (model.Book, error) {
+func GetBook(bookId string) (model.Book, error) {
 	book, exists := repository.GetById(bookId)
 	if !exists {
 		return model.Book{}, errors.New("no book exists")

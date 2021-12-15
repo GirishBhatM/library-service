@@ -1,25 +1,54 @@
 package repository
 
-import "library-service/model"
+import (
+	"encoding/json"
+	"library-service/model"
 
-var bookStore = make(map[int]model.Book)
-var id int = 0
+	"github.com/google/uuid"
+)
 
-func Save(book model.Book) int {
-	id = id + 1
+var client = GetClient()
+
+func Save(book model.Book) string {
+	id := uuid.New().String()
 	book.Id = id
-	bookStore[id] = book
+	bookJsonByte, _ := json.Marshal(book)
+	client.Set("book_"+id, string(bookJsonByte), 0)
 	return id
 }
-func GetById(id int) (model.Book, bool) {
-	book, exists := bookStore[id]
-	return book, exists
+func GetById(id string) (model.Book, bool) {
+	bookByte, err := client.Get("book_" + id).Result()
+	if err != nil {
+		return model.Book{}, false
+	}
+	book := model.Book{}
+	error := json.Unmarshal([]byte(bookByte), &book)
+	if error != nil {
+		return model.Book{}, false
+	}
+	return book, true
 }
 
 func FindAll() []model.Book {
+	var curs uint64
 	books := []model.Book{}
-	for _, book := range bookStore {
-		books = append(books, book)
+	for {
+		keys, curs, error := client.Scan(curs, "book_*", 10).Result()
+		if error != nil {
+			panic(error)
+		}
+		for _, key := range keys {
+			bookJson, e := client.Get(key).Result()
+			if e != nil {
+				panic(e)
+			}
+			book := model.Book{}
+			json.Unmarshal([]byte(bookJson), &book)
+			books = append(books, book)
+		}
+		if curs == 0 {
+			break
+		}
 	}
 	return books
 }

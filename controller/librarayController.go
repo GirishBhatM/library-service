@@ -6,7 +6,6 @@ import (
 	"library-service/service"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -34,12 +33,12 @@ func getAllBooks(w http.ResponseWriter, r *http.Request) {
 
 func getBookById(w http.ResponseWriter, r *http.Request) {
 	var params = mux.Vars(r)
-	bookId, e := strconv.ParseInt(params["id"], 10, 64)
+	bookId, exists := params["id"]
 	w.Header().Set("Content-Type", "application/json")
-	if e != nil {
+	if !exists {
 		fmt.Fprint(w, `"{"error": "invalid id"}"`)
 	} else {
-		book, err := service.GetBook(int(bookId))
+		book, err := service.GetBook(bookId)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, `"{"error": "No data found"}"`)

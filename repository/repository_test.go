@@ -8,8 +8,8 @@ import (
 func TestSaveBook(t *testing.T) {
 	book := model.Book{Name: "Sample Book"}
 	bookId := Save(book)
-	if bookId != 1 {
-		t.Errorf("expected %d found %d", 1, bookId)
+	if bookId != "random" {
+		t.Errorf("expected %s found %s", "random", bookId)
 	}
 }
 
