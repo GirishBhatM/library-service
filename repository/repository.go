@@ -9,6 +9,9 @@ import (
 
 var client = GetClient()
 
+const KEY_PATTERN = "book_*"
+const PAGE_SIZE = 1
+
 func Save(book model.Book) string {
 	id := uuid.New().String()
 	book.Id = id
@@ -33,7 +36,9 @@ func FindAll() []model.Book {
 	var curs uint64
 	books := []model.Book{}
 	for {
-		keys, curs, error := client.Scan(curs, "book_*", 10).Result()
+		var keys []string
+		var error error
+		keys, curs, error = client.Scan(curs, KEY_PATTERN, PAGE_SIZE).Result()
 		if error != nil {
 			panic(error)
 		}
