@@ -38,18 +38,21 @@ func FindAll() []model.Book {
 	for {
 		var keys []string
 		var error error
+		var values []interface{}
 		keys, curs, error = client.Scan(curs, KEY_PATTERN, PAGE_SIZE).Result()
 		if error != nil {
 			panic(error)
 		}
-		for _, key := range keys {
-			bookJson, e := client.Get(key).Result()
-			if e != nil {
-				panic(e)
+		if len(keys) > 0 {
+			values, error = client.MGet(keys...).Result()
+			if error != nil {
+				panic(error)
 			}
-			book := model.Book{}
-			json.Unmarshal([]byte(bookJson), &book)
-			books = append(books, book)
+			for _, bookJson := range values {
+				book := model.Book{}
+				json.Unmarshal([]byte(bookJson.(string)), &book)
+				books = append(books, book)
+			}
 		}
 		if curs == 0 {
 			break
